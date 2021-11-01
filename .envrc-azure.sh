@@ -129,12 +129,11 @@ setup_kubeconfig() {
 
     if [ ! -z "$NAMESPACE" ]; then
         namespaceKubeconfig=$KUBECONFIG-$NAMESPACE
-
         if [ ! -f "$namespaceKubeconfig" ]; then
             yq e ".contexts[].context.namespace=\"$NAMESPACE\"" "$KUBECONFIG" > $namespaceKubeconfig
             chmod go-r $namespaceKubeconfig
-            KUBECONFIG=$namespaceKubeconfig
         fi
+        KUBECONFIG=$namespaceKubeconfig
     fi
 
     export KUBECONFIG
