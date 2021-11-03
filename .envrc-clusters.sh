@@ -24,10 +24,6 @@ pre_work_on_cluster() {
 
 work_on_cluster() {
     enable_scripts
-    export FLUX_FORWARD_NAMESPACE=flux
-    export DOMAIN="$DOMAIN"
-
     pre_work_on_cluster
-
-    log "Working on cluster $(b "$CLUSTER_NAME"), tag $(b "Env=$ENV_NAME_TAG"), region $(b "$CLUSTER_REGION")"
+    log "Working on cluster: $(b "$CLUSTER_NAME"), resource group: $(b "$RESOURCE_GROUP"), region: $(b "$CLUSTER_REGION")"
 }

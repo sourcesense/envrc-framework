@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.1.0/.envrc-clusters.sh" "sha256-dpVuvtUz1m8rGSvZt6etpLHPRRGgLaVMAW2pnTasqis="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.7.0/.envrc-clusters.sh" "sha256-KSnumF0exa2JtFKH4buinHmNlHdfhQrCdOO5zzYoo64="
 
 if type direnv >/dev/null 2>&1 ; then
     # shellcheck disable=SC1090
@@ -134,7 +134,6 @@ setup_kubeconfig() {
 }
 
 setup_cluster_azure() {
-    RESOURCE_GROUP="$CLUSTER_PREFIX-$ENV_NAME_TAG"
     CLUSTER_NAME="$RESOURCE_GROUP-cluster"
     check_azure_login
     setup_vpn
