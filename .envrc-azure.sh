@@ -15,12 +15,6 @@ req_no_ver az
 
 use_cp azure
 
-prepare_eye4task_aks() {
-    local kube_config="${1}"
-    set_azure_profile "unknown"
-    set_kubeconfig_profile "e4t-azure-${kube_config}"
-}
-
 pre_work_on_cluster() {
     export POD_OVERRIDES='
     {
@@ -140,7 +134,7 @@ setup_kubeconfig() {
 }
 
 setup_cluster_azure() {
-    RESOURCE_GROUP="e4t-$ENV_NAME_TAG"
+    RESOURCE_GROUP="$CLUSTER_PREFIX-$ENV_NAME_TAG"
     CLUSTER_NAME="$RESOURCE_GROUP-cluster"
     check_azure_login
     setup_vpn
