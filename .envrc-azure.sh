@@ -90,11 +90,11 @@ get_credentials() {
     resourceGroup="${RESOURCE_GROUP?Must specify resource group in RESOURCE_GROUP}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
-    log "Putting credentials for cluster $(green "$(b "${clusterName}")") in kubeconfig file $(green "$(b "${kubeConfig}")"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Putting credentials for cluster $(green "$(b "${clusterName}")") in kubeconfig file $(green "$(b "${kubeConfig/$HOME/\~}")"), it could take a while, please be patient and ignore direnv warnings..."
     az aks get-credentials --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - > "${kubeConfig}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
-        log "Successfully got credentials from Azure and created kubeconfig: $(green "$(b "${kubeConfig}")")"
+        log "Successfully got credentials from Azure and created kubeconfig: $(green "$(b "${kubeConfig/$HOME/\~}")")"
     else
         whine "Couldn't get credentials from Azure, please retry. Aborting"
     fi
@@ -147,7 +147,7 @@ setup_kubeconfig() {
         if [ ! -f "${namespaceKubeconfig}" ]; then
             yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
-            log "Successfully created env specific kubeconfig: $(green "$(b "${namespaceKubeconfig}")")"
+            log "Successfully created env specific kubeconfig: $(green "$(b "${namespaceKubeconfig/$HOME/\~}")")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
     fi
