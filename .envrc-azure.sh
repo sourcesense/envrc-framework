@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.8.0/.envrc-clusters.sh" "sha256-sIgffKY44x+00/V05E3kfkULZhI7M5lihKxC4jyNTRg="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.9.0/.envrc-clusters.sh" "sha256-106cul3yRFo0RE15H3ODx2fxto4DQ0EOFIJ+790kGBA="
 
 if type direnv >/dev/null 2>&1 ; then
     # shellcheck disable=SC1091
@@ -37,10 +37,12 @@ test_azure_vpn() {
     local net="$1"
     local vpn="$2"
     
-    if [ "$(ifconfig | grep "$net" 2>/dev/null 1>/dev/null)" = 0 ] ; then
-        log "VPN Connection $(b "$vpn") already established, going on."
+    ifconfig | grep "$net" 2>/dev/null 1>/dev/null
+    # shellcheck disable=SC2181
+    if [ "$?" = 0 ] ; then
+        log "VPN Connection $(green "$(b "$vpn") already established, going on.")"
     else
-        log "VPN Network not found, establishing VPN connection $(b "$vpn")"
+        log "VPN Network not found, establishing VPN connection $(green "$(b "$vpn")")"
         scutil --nc start "$vpn"
     fi
 
@@ -55,7 +57,7 @@ test_azure_vpn() {
             sleep 1
         fi
     done
-    log "VPN Connection: $(b "$connection")"
+    log "VPN Connection: $(green "$(b "$connection")")"
 }
 
 set_group() {
@@ -88,11 +90,11 @@ get_credentials() {
     resourceGroup="${RESOURCE_GROUP?Must specify resource group in RESOURCE_GROUP}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
-    log "Putting credentials for cluster $(b "${clusterName}") in kubeconfig file $(b "${kubeConfig}"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Putting credentials for cluster $(green "$(b "${clusterName}")") in kubeconfig file $(green "$(b "${kubeConfig}")"), it could take a while, please be patient and ignore direnv warnings..."
     az aks get-credentials --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - > "${kubeConfig}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
-        log "Successfully got credentials from Azure and created kubeconfig: $(b "${kubeConfig}")"
+        log "Successfully got credentials from Azure and created kubeconfig: $(green "$(b "${kubeConfig}")")"
     else
         whine "Couldn't get credentials from Azure, please retry. Aborting"
     fi
@@ -100,25 +102,25 @@ get_credentials() {
 
 set_network_cidr() {
     local resource_group="$1"
-    log "Getting Network CIDR from $(b "${resource_group}"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Getting Network CIDR from $(green "$(b "${resource_group}")"), it could take a while, please be patient and ignore direnv warnings..."
     NETWORK_CIDR=$(az network vnet-gateway show --resource-group "${resource_group}" --name "${resource_group}-gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]'|cut -d\. -f1-3)
 
     if [[ ! ${NETWORK_CIDR} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         whine "Couldn't get Azure Gateway Network CIDR. Aborting"
     else
-        log "Successfully got Azure Gateway Network CIDR: $(b "${NETWORK_CIDR}.0")"
+        log "Successfully got Azure Gateway Network CIDR: $(green "$(b "${NETWORK_CIDR}.0")")"
         export NETWORK_CIDR
     fi
 }
 
 check_azure_login() {
-    log "Checking access to Azure Cluster $(b "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Checking access to Azure Cluster $(green "$(b "${CLUSTER_NAME}")"), it could take a while, please be patient and ignore direnv warnings..."
 
     az group list >/dev/null 2>&1
     # shellcheck disable=SC2181
     if [ "$?" != 0 ]; then
         if [ "$(az login 2>/dev/null | jq)" ]; then
-            log "Successfully logged in to Azure"
+            log "$(green "$(b "Successfully logged in to Azure")")"
         else
             whine "Couldn't login to Azure, please retry. Aborting"
         fi
@@ -145,7 +147,7 @@ setup_kubeconfig() {
         if [ ! -f "${namespaceKubeconfig}" ]; then
             yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
-            log "Successfully created env specific kubeconfig: $(b "${namespaceKubeconfig}")"
+            log "Successfully created env specific kubeconfig: $(green "$(b "${namespaceKubeconfig}")")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
     fi
