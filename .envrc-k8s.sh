@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=/_bootstrap.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.9.0/_bootstrap.sh" "sha256-2RUx8ANiImSPL/PsQnkVDsSVe+zuEafc15BkuV2pttc="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.10.0/_bootstrap.sh" "sha256-z+Zqhjcr4DEZ5dW6kYTLYsH8Dw9XxdvSNEgw7mBhfMw="
 
 work_on() {
     local release_name="$1"
