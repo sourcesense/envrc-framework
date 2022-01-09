@@ -1,19 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.10.0/.envrc-clusters.sh" "sha256-vRo61rDMLGVl6XauULiO+jF4BpbSonU7KUtfAx3RwCg="
-
-
-use_cp() {
-    local cloud_provider="$1"
-    log "Setting env for cloud provider: $(green "$(b "$cloud_provider")")"
-    dep include EcoMind/k8s-common kube-config-"$cloud_provider"
-}
-
-pre_work_on_cluster() {
-    # Nothing to to (depends on cloud provider)
-    return 0
-}
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.11.0/.envrc-clusters.sh" "sha256-WBI_B2lc2DzhqKWg4NEXADKN37kAzCrMawMO6+JvwI0="
 
 work_on_cluster() {
     pre_work_on_cluster
@@ -28,7 +16,7 @@ else
     exit 1
 fi
 
-req_no_ver az
+req_no_ver gcloud
 
 use_cp gcp
 
@@ -80,7 +68,7 @@ check_gcp_login() {
         gcloud auth login 2>/dev/null
         if [ "$?" = 0 ]; then
             log "$(green "$(b "Successfully logged in to GCP with user $(gcloud config get-value account)")")"
-            
+
             gcloud auth application-default print-access-token >/dev/null 2>&1
             # shellcheck disable=SC2181
             if [ "$?" != 0 ]; then

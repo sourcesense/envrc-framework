@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.10.0/.envrc-clusters.sh" "sha256-vRo61rDMLGVl6XauULiO+jF4BpbSonU7KUtfAx3RwCg="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.11.0/.envrc-clusters.sh" "sha256-WBI_B2lc2DzhqKWg4NEXADKN37kAzCrMawMO6+JvwI0="
 
 if type direnv >/dev/null 2>&1 ; then
     # shellcheck disable=SC1091
@@ -36,7 +36,7 @@ pre_work_on_cluster() {
 test_azure_vpn() {
     local net="$1"
     local vpn="$2"
-    
+
     ifconfig | grep "$net" 2>/dev/null 1>/dev/null
     # shellcheck disable=SC2181
     if [ "$?" = 0 ] ; then
