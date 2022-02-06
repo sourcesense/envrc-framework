@@ -7,5 +7,9 @@ if [[ -z "$file2calc" ]] ; then
 fi
 
 hash=$(openssl dgst -sha256 -binary "$file2calc" |openssl base64 -A)
-echo -e "normal hash:\nsha256-$hash\n\ncleaned hash:"
-echo -e "sha256-$hash"| tr "/" "_"
+rawHash="sha256-${hash}"
+cleanedHash="$(echo -e "sha256-$hash" | tr "/" "_")"
+echo -e "normal hash:\n$rawHash\n"
+echo -e "cleaned hash:\n$cleanedHash"
+echo -n "$cleanedHash" | pbcopy
+echo "(copied to clipboard)"
