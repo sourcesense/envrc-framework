@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-k8s.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.12.0/.envrc-k8s.sh" "sha256-+_0KiI6QL2ZSuHJOuD_xuEb_4XKN1MBa4EjRgFBeM48="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.13.0/.envrc-k8s.sh" "sha256-d+utn9YPnqdx3HeWkQXIUhOuyLMqJHRTkuUAN3cqIpQ="
 
 use_cp() {
     local cloud_provider="$1"
-    log "Setting env for cloud provider: $(green "$(b "$cloud_provider")")"
+    log "Setting env for cloud provider: $(ab "$cloud_provider")"
     dep include EcoMind/k8s-common kube-config-"$cloud_provider"
 }
 
@@ -25,5 +25,5 @@ pre_work_on_cluster() {
 work_on_cluster() {
     enable_scripts
     pre_work_on_cluster
-    log "Working on cluster: $(green "$(b "$CLUSTER_NAME")"), resource group: $(green "$(b "$RESOURCE_GROUP")"), region: $(green "$(b "$CLUSTER_REGION")")"
+    log "Working on cluster: $(ab "$CLUSTER_NAME")"
 }

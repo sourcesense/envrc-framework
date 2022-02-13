@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.12.0/.envrc-clusters.sh" "sha256-HT9+TQVKdJ6MQzWuw5_kM+MBWTY2AJoRQqM7ZM4CnWc="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.13.0/.envrc-clusters.sh" "sha256-B6Edv4svlICMHOyleo6dNKghlp44F47hd_T8A6sh2Jk="
 
 work_on_cluster() {
     pre_work_on_cluster
-    log "Working on cluster: $(green "$(b "$CLUSTER_NAME")"), AWS SSO id: $(green "$(b "$AWS_SSO_ID")"), region: $(green "$(b "$CLUSTER_REGION")")"
+    log "Working on cluster: $(ab "$CLUSTER_NAME"), AWS SSO id: $(ab "$AWS_SSO_ID"), region: $(ab "$CLUSTER_REGION")"
 }
 
 if type direnv >/dev/null 2>&1 ; then
@@ -15,8 +15,6 @@ else
     echo "Could not load direnv stdlib" >&2
     exit 1
 fi
-
-req_no_ver aws
 
 use_cp aws
 
@@ -62,25 +60,25 @@ get_credentials() {
     clusterRegion="${CLUSTER_REGION?Must specify cluster region in CLUSTER_REGION}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
-    log "Putting credentials for cluster $(green "$(b "${clusterName}")") in kubeconfig file $(green "$(b "${kubeConfig/$HOME/\~}")"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
     KUBECONFIG=$kubeConfig aws eks update-kubeconfig --region "${clusterRegion}" --name "${clusterName}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
-        log "Successfully got credentials from AWS and created kubeconfig: $(green "$(b "${kubeConfig/$HOME/\~}")")"
+        log "Successfully got credentials from AWS and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
     else
         whine "Couldn't get credentials from AWS, please retry. Aborting"
     fi
 }
 
 check_aws_login_sso() {
-    log "Checking access to AWS Cluster $(green "$(b "${CLUSTER_NAME}")"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Checking access to AWS Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     awsConfig="$HOME/.aws/config"
     if grep "\[profile $AWS_PROFILE\]" "$awsConfig" >/dev/null 2>&1 ; then
-        log "Found profile $(green "$(b "${AWS_PROFILE}")") in AWS config file $(green "$(b "${awsConfig/$HOME/\~}")")"
+        log "Found profile $(ab "${AWS_PROFILE}") in AWS config file $(ab "${awsConfig/$HOME/\~}")"
     else
-        warn "Couldn't find profile $(green "$(b "${AWS_PROFILE}")") in AWS config file $(green "$(b "${awsConfig/$HOME/\~}")"), will create it now"
-        log "Setting up AWS SSO credentials in order to access SSO ID $(green "$(b "${AWS_SSO_ID}")") with SSO role $(green "$(b "${AWS_SSO_ROLE_NAME}")") in region $(green "$(b "${CLUSTER_REGION}")") (account id: $(green "$(b "${AWS_ACCOUNT_ID}")"))"
+        warn "Couldn't find profile $(ab "${AWS_PROFILE}") in AWS config file $(ab "${awsConfig/$HOME/\~}"), will create it now"
+        log "Setting up AWS SSO credentials in order to access SSO ID $(ab "${AWS_SSO_ID}") with SSO role $(ab "${AWS_SSO_ROLE_NAME}") in region $(ab "${CLUSTER_REGION}") (account id: $(ab "${AWS_ACCOUNT_ID}"))"
         aws configure set sso_start_url "https://${AWS_SSO_ID}.awsapps.com/start"
         aws configure set sso_region "${CLUSTER_REGION}"
         aws configure set sso_account_id "${AWS_ACCOUNT_ID}"
@@ -94,12 +92,12 @@ check_aws_login_sso() {
     if [ "$?" != 0 ]; then
         aws sso login 2>/dev/null
         if [ "$?" = 0 ]; then
-            log "$(green "$(b "Successfully logged in to AWS with user $(aws sts get-caller-identity | jq -r .Arn -)")")"
+            log "$(ab "Successfully logged in to AWS with user $(aws sts get-caller-identity | jq -r .Arn -)")"
         else
             whine "Couldn't login to AWS, please retry running a $(b "direnv reload"). Aborting"
         fi
     else
-        log "Already logged in to AWS with user $(green "$(b "$(aws sts get-caller-identity | jq -r .Arn -)")")"
+        log "Already logged in to AWS with user $(ab "$(aws sts get-caller-identity | jq -r .Arn -)")"
     fi
 }
 
@@ -115,7 +113,7 @@ setup_kubeconfig() {
         if [ ! -f "${namespaceKubeconfig}" ]; then
             yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
-            log "Successfully created env specific kubeconfig: $(green "$(b "${namespaceKubeconfig/$HOME/\~}")")"
+            log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
     fi

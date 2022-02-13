@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.12.0/.envrc-clusters.sh" "sha256-HT9+TQVKdJ6MQzWuw5_kM+MBWTY2AJoRQqM7ZM4CnWc="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.13.0/.envrc-clusters.sh" "sha256-B6Edv4svlICMHOyleo6dNKghlp44F47hd_T8A6sh2Jk="
 
 work_on_cluster() {
     pre_work_on_cluster
-    log "Working on cluster: $(green "$(b "$CLUSTER_NAME")"), project id: $(green "$(b "$PROJECT_ID")"), region: $(green "$(b "$CLUSTER_REGION")")"
+    log "Working on cluster: $(ab "$CLUSTER_NAME"), project id: $(ab "$PROJECT_ID"), region: $(ab "$CLUSTER_REGION")"
 }
 
 if type direnv >/dev/null 2>&1 ; then
@@ -15,8 +15,6 @@ else
     echo "Could not load direnv stdlib" >&2
     exit 1
 fi
-
-req_no_ver gcloud
 
 use_cp gcp
 
@@ -49,43 +47,43 @@ get_credentials() {
     clusterRegion="${CLUSTER_REGION?Must specify cluster region in CLUSTER_REGION}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
-    log "Putting credentials for cluster $(green "$(b "${clusterName}")") in kubeconfig file $(green "$(b "${kubeConfig/$HOME/\~}")"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
     KUBECONFIG=$kubeConfig gcloud container clusters get-credentials "${clusterName}" --region "${clusterRegion}" --project "${projectId}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
-        log "Successfully got credentials from GCP and created kubeconfig: $(green "$(b "${kubeConfig/$HOME/\~}")")"
+        log "Successfully got credentials from GCP and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
     else
         whine "Couldn't get credentials from GCP, please retry. Aborting"
     fi
 }
 
 check_gcp_login() {
-    log "Checking access to GCP Cluster $(green "$(b "${CLUSTER_NAME}")"), it could take a while, please be patient and ignore direnv warnings..."
+    log "Checking access to GCP Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     gcloud auth print-access-token >/dev/null 2>&1
     # shellcheck disable=SC2181
     if [ "$?" != 0 ]; then
         gcloud auth login 2>/dev/null
         if [ "$?" = 0 ]; then
-            log "$(green "$(b "Successfully logged in to GCP with user $(gcloud config get-value account)")")"
+            log "$(ab "Successfully logged in to GCP with user $(gcloud config get-value account)")"
 
             gcloud auth application-default print-access-token >/dev/null 2>&1
             # shellcheck disable=SC2181
             if [ "$?" != 0 ]; then
                 gcloud auth application-default login 2>/dev/null
                 if [ "$?" = 0 ]; then
-                    log "$(green "$(b "Successfully logged in to GCP for SOPS support with user $(gcloud config get-value account)")")"
+                    log "$(ab "Successfully logged in to GCP for SOPS support with user $(gcloud config get-value account)")"
                 else
                     whine "Couldn't login to GCP, please retry running a $(b "direnv reload"). Aborting"
                 fi
             else
-                log "Already logged in to GCP with user $(green "$(b "$(gcloud config get-value account)")")"
+                log "Already logged in to GCP with user $(ab "$(gcloud config get-value account)")"
             fi
         else
             whine "Couldn't login to GCP, please retry running a $(b "direnv reload"). Aborting"
         fi
     else
-        log "Already logged in to GCP with user $(green "$(b "$(gcloud config get-value account)")")"
+        log "Already logged in to GCP with user $(ab "$(gcloud config get-value account)")"
     fi
 }
 
@@ -101,7 +99,7 @@ setup_kubeconfig() {
         if [ ! -f "${namespaceKubeconfig}" ]; then
             yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
-            log "Successfully created env specific kubeconfig: $(green "$(b "${namespaceKubeconfig/$HOME/\~}")")"
+            log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
     fi
