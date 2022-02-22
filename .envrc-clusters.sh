@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-k8s.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.0/.envrc-k8s.sh" "sha256-53N12MhTefsmDX7XBF0s7E7o1ZreSvkB631v_HWh4Vg="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.1/.envrc-k8s.sh" "sha256-GZScipLPjIp4WMYcci6muw7hfyEUcJAy8lLbuDWdelo="
 
 use_cp() {
     local cloud_provider="$1"
