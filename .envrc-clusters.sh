@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-k8s.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.3/.envrc-k8s.sh" "sha256-LBhiiq_k5_e6MtZ6GoMOvwc1de1kGllZxoq1MC_+1Ko="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.4/.envrc-k8s.sh" "sha256-ww9wDPxpGLVa1fN5MS8RcFvWP2PoALdNBYXiGpiR5wk="
 
 use_cp() {
     local cloud_provider="$1"
@@ -26,4 +26,13 @@ work_on_cluster() {
     enable_scripts
     pre_work_on_cluster
     log "Working on cluster: $(ab "$CLUSTER_NAME")"
+}
+
+cache_dir_of() {
+    local subject="$1"
+    local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/envrc-framework/${subject}"
+    if [ ! -d "${cache_dir}" ]; then
+        mkdir -p "${cache_dir}"
+    fi
+    echo "${cache_dir}"
 }
