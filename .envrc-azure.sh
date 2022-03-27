@@ -107,10 +107,18 @@ get_credentials() {
 set_network_cidr() {
     local resource_group="$1"
     log "Getting Network CIDR from $(ab "${resource_group}"), it could take a while, please be patient and ignore direnv warnings..."
-    NETWORK_CIDR=$(az network vnet-gateway show --resource-group "${resource_group}" --name "${resource_group}-gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]'|cut -d\. -f1-3)
+    local cache_dir
+    cache_dir="$(cache_dir_of azure/vnet/cidr)"
+    local cache_file="$cache_dir/$resource_group"
+    if [ -f "$cache_file" ]; then
+        NETWORK_CIDR="$(cat "$cache_file")"
+    else
+        NETWORK_CIDR=$(az network vnet-gateway show --resource-group "${resource_group}" --name "${resource_group}-gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]' | cut -d\. -f1-3)
+        echo "$NETWORK_CIDR" >"$cache_file"
+    fi
 
     if [[ ! ${NETWORK_CIDR} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        whine "Couldn't get Azure Gateway Network CIDR. Aborting"
+        whine "Couldn't get Azure Gateway Network CIDR. Aborting, remove cache file $(ab "${cache_file}") to retry."
     else
         log "Successfully got Azure Gateway Network CIDR: $(ab "${NETWORK_CIDR}.0")"
         export NETWORK_CIDR
