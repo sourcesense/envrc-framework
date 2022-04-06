@@ -3,12 +3,13 @@
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
 source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.5/.envrc-clusters.sh" "sha256-a5wiANzdjgnv_H1vN+uT8VZiIrjOmU8w7J134CJUdU8="
 
-work_on_cluster() {
+work_on_cluster()
+{
     pre_work_on_cluster
     log "Working on cluster: $(ab "$CLUSTER_NAME"), AWS SSO id: $(ab "$AWS_SSO_ID"), region: $(ab "$CLUSTER_REGION")"
 }
 
-if type direnv >/dev/null 2>&1 ; then
+if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
     . <(direnv stdlib)
 else
@@ -18,44 +19,53 @@ fi
 
 use_cp aws
 
-pre_work_on_cluster() {
+pre_work_on_cluster()
+{
     export POD_OVERRIDES=''
 }
 
-test_vpn() {
+test_vpn()
+{
     log "No check on VPN"
 }
 
-set_region() {
+set_region()
+{
     local resource_region="$1"
     export RESOURCE_REGION="$resource_region"
 }
 
-set_aws_account_id() {
+set_aws_account_id()
+{
     local aws_account_id="$1"
     export AWS_ACCOUNT_ID="$aws_account_id"
 }
 
-set_aws_sso_id() {
+set_aws_sso_id()
+{
     local aws_sso_id="$1"
     export AWS_SSO_ID="$aws_sso_id"
 }
 
-set_aws_sso_role_name() {
+set_aws_sso_role_name()
+{
     local aws_sso_role_name="$1"
     export AWS_SSO_ROLE_NAME="$aws_sso_role_name"
 }
 
-set_cluster_name() {
+set_cluster_name()
+{
     local cluster_name="$1"
     export CLUSTER_NAME="$cluster_name"
 }
 
-set_aws_profile() {
+set_aws_profile()
+{
     export AWS_PROFILE="$CLUSTER_NAME-$CLUSTER_REGION-$AWS_ACCOUNT_ID"
 }
 
-get_credentials() {
+get_credentials()
+{
     clusterName="${CLUSTER_NAME?Must specify cluster name in CLUSTER_NAME}"
     clusterRegion="${CLUSTER_REGION?Must specify cluster region in CLUSTER_REGION}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
@@ -70,11 +80,12 @@ get_credentials() {
     fi
 }
 
-check_aws_login_sso() {
+check_aws_login_sso()
+{
     log "Checking access to AWS Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     awsConfig="$HOME/.aws/config"
-    if grep "\[profile $AWS_PROFILE\]" "$awsConfig" >/dev/null 2>&1 ; then
+    if grep "\[profile $AWS_PROFILE\]" "$awsConfig" >/dev/null 2>&1; then
         log "Found profile $(ab "${AWS_PROFILE}") in AWS config file $(ab "${awsConfig/$HOME/\~}")"
     else
         warn "Couldn't find profile $(ab "${AWS_PROFILE}") in AWS config file $(ab "${awsConfig/$HOME/\~}"), will create it now"
@@ -101,7 +112,8 @@ check_aws_login_sso() {
     fi
 }
 
-setup_kubeconfig() {
+setup_kubeconfig()
+{
     KUBECONFIG=~/.kube/profiles/aws-"${AWS_SSO_ID}"-"${CLUSTER_NAME}"
 
     if [ ! -s "${KUBECONFIG}" ]; then
@@ -111,7 +123,7 @@ setup_kubeconfig() {
     if [ -n "${NAMESPACE}" ]; then
         namespaceKubeconfig="${KUBECONFIG}-${NAMESPACE}"
         if [ ! -f "${namespaceKubeconfig}" ]; then
-            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
+            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" >"${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
@@ -120,7 +132,8 @@ setup_kubeconfig() {
     export KUBECONFIG
 }
 
-setup_cluster_aws_sso() {
+setup_cluster_aws_sso()
+{
     set_aws_sso_id "${AWS_SSO_ID}"
     set_aws_sso_role_name "${AWS_SSO_ROLE_NAME}"
     set_aws_account_id "${AWS_ACCOUNT_ID}"

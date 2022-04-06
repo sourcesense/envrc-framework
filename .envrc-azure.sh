@@ -3,7 +3,7 @@
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
 source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.5/.envrc-clusters.sh" "sha256-a5wiANzdjgnv_H1vN+uT8VZiIrjOmU8w7J134CJUdU8="
 
-if type direnv >/dev/null 2>&1 ; then
+if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
     . <(direnv stdlib)
 else
@@ -13,13 +13,15 @@ fi
 
 use_cp azure
 
-work_on_cluster() {
+work_on_cluster()
+{
     enable_scripts
     pre_work_on_cluster
     log "Working on cluster: $(ab "$CLUSTER_NAME"), resource group: $(ab "$RESOURCE_GROUP"), region: $(ab "$CLUSTER_REGION")"
 }
 
-pre_work_on_cluster() {
+pre_work_on_cluster()
+{
     export POD_OVERRIDES='
     {
         "apiVersion": "v1",
@@ -37,13 +39,14 @@ pre_work_on_cluster() {
     }'
 }
 
-test_azure_vpn() {
+test_azure_vpn()
+{
     local net="$1"
     local vpn="$2"
 
     ifconfig | grep "$net" 2>/dev/null 1>/dev/null
     # shellcheck disable=SC2181
-    if [ "$?" = 0 ] ; then
+    if [ "$?" = 0 ]; then
         log "VPN Connection $(a "$(b "$vpn") already established, going on.")"
     else
         log "VPN Network not found, establishing VPN connection $(ab "$vpn")"
@@ -53,10 +56,9 @@ test_azure_vpn() {
     local connection
     local attempts=0
     local maxAttempts=10
-    while [ -z "$connection" ] && (( attempts < maxAttempts ))
-    do
-        connection="$(scutil --nc status "$vpn"|head -1|grep "^Connected$")"
-        attempts=$(( attempts + 1 ))
+    while [ -z "$connection" ] && ((attempts < maxAttempts)); do
+        connection="$(scutil --nc status "$vpn" | head -1 | grep "^Connected$")"
+        attempts=$((attempts + 1))
         if [ -z "$connection" ]; then
             sleep 1
         fi
@@ -64,38 +66,44 @@ test_azure_vpn() {
     log "VPN Connection: $(ab "$connection")"
 }
 
-set_group() {
+set_group()
+{
     local resource_group="$1"
     export RESOURCE_GROUP="$resource_group"
 }
 
-set_location() {
+set_location()
+{
     local resource_location="$1"
     export RESOURCE_LOCATION="$resource_location"
 }
 
-set_subscription() {
+set_subscription()
+{
     local subscription_id="$1"
     export SUBSCRIPTION_ID="$subscription_id"
 }
 
-set_tenant() {
+set_tenant()
+{
     local tenant_id="$1"
     export TENANT_ID="$tenant_id"
 }
 
-set_cluster_name() {
+set_cluster_name()
+{
     local cluster_name="$1"
     export CLUSTER_NAME="$cluster_name"
 }
 
-get_credentials() {
+get_credentials()
+{
     clusterName="${CLUSTER_NAME?Must specify cluster name in CLUSTER_NAME}"
     resourceGroup="${RESOURCE_GROUP?Must specify resource group in RESOURCE_GROUP}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
     log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
-    az aks get-credentials --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - > "${kubeConfig}" 2>/dev/null
+    az aks get-credentials --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - >"${kubeConfig}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
         log "Successfully got credentials from Azure and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
@@ -104,7 +112,8 @@ get_credentials() {
     fi
 }
 
-set_network_cidr() {
+set_network_cidr()
+{
     local resource_group="$1"
     log "Getting Network CIDR from $(ab "${resource_group}"), it could take a while, please be patient and ignore direnv warnings..."
     local cache_dir
@@ -125,7 +134,8 @@ set_network_cidr() {
     fi
 }
 
-check_azure_login() {
+check_azure_login()
+{
     log "Checking access to Azure Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     az group list >/dev/null 2>&1
@@ -139,15 +149,17 @@ check_azure_login() {
     fi
 }
 
-setup_vpn() {
+setup_vpn()
+{
     local vpn="${RESOURCE_GROUP}-vnet"
-    if  [ -z "${NETWORK_CIDR}" ]; then
+    if [ -z "${NETWORK_CIDR}" ]; then
         set_network_cidr "${RESOURCE_GROUP}"
     fi
     test_azure_vpn "${NETWORK_CIDR}" "${vpn}"
 }
 
-setup_kubeconfig() {
+setup_kubeconfig()
+{
     KUBECONFIG=~/.kube/profiles/"${RESOURCE_GROUP}"
 
     if [ ! -s "${KUBECONFIG}" ]; then
@@ -157,7 +169,7 @@ setup_kubeconfig() {
     if [ -n "${NAMESPACE}" ]; then
         namespaceKubeconfig="${KUBECONFIG}-${NAMESPACE}"
         if [ ! -f "${namespaceKubeconfig}" ]; then
-            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
+            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" >"${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
@@ -166,7 +178,8 @@ setup_kubeconfig() {
     export KUBECONFIG
 }
 
-setup_cluster_azure() {
+setup_cluster_azure()
+{
     CLUSTER_NAME="${RESOURCE_GROUP}-cluster"
     check_azure_login
     setup_vpn

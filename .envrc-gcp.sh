@@ -3,12 +3,13 @@
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
 source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.5/.envrc-clusters.sh" "sha256-a5wiANzdjgnv_H1vN+uT8VZiIrjOmU8w7J134CJUdU8="
 
-work_on_cluster() {
+work_on_cluster()
+{
     pre_work_on_cluster
     log "Working on cluster: $(ab "$CLUSTER_NAME"), project id: $(ab "$PROJECT_ID"), region: $(ab "$CLUSTER_REGION")"
 }
 
-if type direnv >/dev/null 2>&1 ; then
+if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
     . <(direnv stdlib)
 else
@@ -18,30 +19,36 @@ fi
 
 use_cp gcp
 
-pre_work_on_cluster() {
+pre_work_on_cluster()
+{
     export POD_OVERRIDES=''
 }
 
-test_vpn() {
+test_vpn()
+{
     log "No check on VPN"
 }
 
-set_region() {
+set_region()
+{
     local resource_region="$1"
     export RESOURCE_REGION="$resource_region"
 }
 
-set_project_id() {
+set_project_id()
+{
     local project_id="$1"
     export PROJECT_ID="$project_id"
 }
 
-set_cluster_name() {
+set_cluster_name()
+{
     local cluster_name="$1"
     export CLUSTER_NAME="$cluster_name"
 }
 
-get_credentials() {
+get_credentials()
+{
     clusterName="${CLUSTER_NAME?Must specify cluster name in CLUSTER_NAME}"
     projectId="${PROJECT_ID?Must specify project id in PROJECT_ID}"
     clusterRegion="${CLUSTER_REGION?Must specify cluster region in CLUSTER_REGION}"
@@ -57,7 +64,8 @@ get_credentials() {
     fi
 }
 
-check_gcp_login() {
+check_gcp_login()
+{
     log "Checking access to GCP Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     gcloud auth print-access-token >/dev/null 2>&1
@@ -87,7 +95,8 @@ check_gcp_login() {
     fi
 }
 
-setup_kubeconfig() {
+setup_kubeconfig()
+{
     KUBECONFIG=~/.kube/profiles/gcp-"${PROJECT_ID}"-"${CLUSTER_NAME}"
 
     if [ ! -s "${KUBECONFIG}" ]; then
@@ -97,7 +106,7 @@ setup_kubeconfig() {
     if [ -n "${NAMESPACE}" ]; then
         namespaceKubeconfig="${KUBECONFIG}-${NAMESPACE}"
         if [ ! -f "${namespaceKubeconfig}" ]; then
-            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" > "${namespaceKubeconfig}"
+            yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" >"${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
@@ -106,7 +115,8 @@ setup_kubeconfig() {
     export KUBECONFIG
 }
 
-setup_cluster_gcp() {
+setup_cluster_gcp()
+{
     set_project_id "${PROJECT_ID}"
     set_region "${CLUSTER_REGION}"
     CLUSTER_NAME="${CLUSTER_NAME:-${PROJECT_ID}-cluster}"

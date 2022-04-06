@@ -7,7 +7,8 @@ req_ver k9s 0.25.18
 req_ver kustomize 4.5.2
 req_ver sops 3.7.1
 
-work_on() {
+work_on()
+{
     local release_name="$1"
     local namespace_name="${2:-${release_name}}"
     export NAMESPACE="$namespace_name"
