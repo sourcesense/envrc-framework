@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.3/.envrc-clusters.sh" "sha256-D5JIAUtzbeYCHPhj2Ohk1QJVEQy+cU2hYFCkIsDJINg="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.6/.envrc-clusters.sh" "sha256-WwIxaNc_MDQajoIDBjZDXkJlqGqruSHaSSUySqz_s6w="
 
 if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
@@ -65,8 +65,18 @@ set_vpn_cidr()
     local group="$2"
     local gateway="$3"
 
-    log "Getting Network CIDR from vpn gateway"
-    VPN_CIDR=$(az network vnet-gateway show --subscription "$subscription" --resource-group "$group" --name "$gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]' | cut -d\. -f1-3)
+    local cache_dir
+    cache_dir="$(cache_dir_of "azure/$subscription/$group")"
+    local cache_file="$cache_dir/vnet-gateway_${gateway}_cidr"
+    if [ -f "$cache_file" ]; then
+        log "Getting Network CIDR from cache file: $cache_file"
+        VPN_CIDR="$(cat "$cache_file")"
+    else
+        log "Getting Network CIDR from vpn gateway"
+        VPN_CIDR=$(az network vnet-gateway show --subscription "$subscription" --resource-group "$group" --name "$gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]' | cut -d\. -f1-3)
+        log "Storing Network CIDR in cache file: $cache_file"
+        echo "$VPN_CIDR" >"$cache_file"
+    fi
 
     if [[ ! ${VPN_CIDR} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         whine "Couldn't get Azure Gateway Network CIDR. Aborting"
