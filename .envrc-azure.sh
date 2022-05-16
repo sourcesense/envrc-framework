@@ -13,10 +13,57 @@ fi
 
 use_cp azure
 
-set_tenant()
+# work_on_cluster() {
+#     enable_scripts
+#     #pre_work_on_cluster
+#     log "Working on cluster: $(ab "$CLUSTER_NAME"), resource group: $(ab "$RESOURCE_GROUP"), region: $(ab "$CLUSTER_REGION")"
+# }
+
+# pre_work_on_cluster() {
+#     export POD_OVERRIDES='
+#     {
+#         "apiVersion": "v1",
+#         "kind": "Pod",
+#         "spec": {
+#             "tolerations": [
+#                 {
+#                     "effect": "NoSchedule",
+#                     "key": "kubernetes.azure.com/scalesetpriority",
+#                     "operator": "Equal",
+#                     "value": "spot"
+#                 }
+#             ]
+#         }
+#     }'
+# }
+
+test_azure_vpn()
 {
-    local tenant_id="$1"
-    export TENANT_ID="$tenant_id"
+    ifconfig | grep "$VPN_CIDR" 2>/dev/null 1>/dev/null
+    # shellcheck disable=SC2181
+    if [ "$?" = 0 ]; then
+        log "VPN Connection $(a "$(b "$vpn_name") already established, going on.")"
+    else
+        log "VPN Network not found, establishing VPN connection $(ab "$vpn_name")"
+        scutil --nc start "$vpn_name"
+    fi
+
+    local connection
+    local attempts=0
+    local maxAttempts=10
+    while [ -z "$connection" ] && ((attempts < maxAttempts)); do
+        connection="$(scutil --nc status "$vpn_name" | head -1 | grep "^Connected$")"
+        attempts=$((attempts + 1))
+        if [ -z "$connection" ]; then
+            sleep 1
+        fi
+    done
+    log "VPN Connection: $(ab "$connection")"
+}
+set_group()
+{
+    local resource_group="$1"
+    export RESOURCE_GROUP="$resource_group"
 }
 set_location()
 {
@@ -28,10 +75,10 @@ set_subscription()
     local subscription_id="$1"
     export SUBSCRIPTION_ID="$subscription_id"
 }
-set_group()
+set_tenant()
 {
-    local resource_group="$1"
-    export RESOURCE_GROUP="$resource_group"
+    local tenant_id="$1"
+    export TENANT_ID="$tenant_id"
 }
 set_vpn_gateway_name()
 {
@@ -44,18 +91,15 @@ set_cluster_name()
     export CLUSTER_NAME="$cluster_name"
 }
 
-check_azure_login()
+get_credentials()
 {
-    log "Checking access to Azure"
+    log "Putting credentials for cluster $(ab "$CLUSTER_NAME") in kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
+    az aks get-credentials --subscription "$SUBSCRIPTION_ID" --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME" --file - >"$KUBECONFIG" 2>/dev/null
 
-    az group list >/dev/null 2>&1
-    # shellcheck disable=SC2181
-    if [ "$?" != 0 ]; then
-        if [ "$(az login 2>/dev/null | jq)" ]; then
-            log "$(ab "Successfully logged in to Azure")"
-        else
-            whine "Couldn't login to Azure, please retry. Aborting"
-        fi
+    if [ -s "$KUBECONFIG" ]; then
+        log "Successfully got credentials from Azure and created kubeconfig: $(ab "${KUBECONFIG/$HOME/\~}")"
+    else
+        whine "Couldn't get credentials from Azure, please retry. Aborting"
     fi
 }
 
@@ -86,6 +130,21 @@ set_vpn_cidr()
     fi
 }
 
+check_azure_login()
+{
+    log "Checking access to Azure"
+
+    az group list >/dev/null 2>&1
+    # shellcheck disable=SC2181
+    if [ "$?" != 0 ]; then
+        if [ "$(az login 2>/dev/null | jq)" ]; then
+            log "$(ab "Successfully logged in to Azure")"
+        else
+            whine "Couldn't login to Azure, please retry. Aborting"
+        fi
+    fi
+}
+
 setup_vpn()
 {
     local subscription="$1"
@@ -97,38 +156,7 @@ setup_vpn()
         set_vpn_cidr "$subscription" "$group" "$gateway"
     fi
 
-    ifconfig | grep "$VPN_CIDR" 2>/dev/null 1>/dev/null
-    # shellcheck disable=SC2181
-    if [ "$?" = 0 ]; then
-        log "VPN Connection $(a "$(b "$vpn_name") already established, going on.")"
-    else
-        log "VPN Network not found, establishing VPN connection $(ab "$vpn_name")"
-        scutil --nc start "$vpn_name"
-    fi
-
-    local connection
-    local attempts=0
-    local maxAttempts=10
-    while [ -z "$connection" ] && ((attempts < maxAttempts)); do
-        connection="$(scutil --nc status "$vpn_name" | head -1 | grep "^Connected$")"
-        attempts=$((attempts + 1))
-        if [ -z "$connection" ]; then
-            sleep 1
-        fi
-    done
-    log "VPN Connection: $(ab "$connection")"
-}
-
-get_credentials()
-{
-    log "Putting credentials for cluster $(ab "$CLUSTER_NAME") in kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
-    az aks get-credentials --subscription "$SUBSCRIPTION_ID" --resource-group "$RESOURCE_GROUP" --name "$CLUSTER_NAME" --file - >"$KUBECONFIG" 2>/dev/null
-
-    if [ -s "$KUBECONFIG" ]; then
-        log "Successfully got credentials from Azure and created kubeconfig: $(ab "${KUBECONFIG/$HOME/\~}")"
-    else
-        whine "Couldn't get credentials from Azure, please retry. Aborting"
-    fi
+    test_azure_vpn
 }
 
 setup_kubeconfig()
@@ -159,27 +187,3 @@ setup_cluster_azure()
     work_on_cluster
     setup_kubeconfig
 }
-
-# work_on_cluster() {
-#     enable_scripts
-#     #pre_work_on_cluster
-#     log "Working on cluster: $(ab "$CLUSTER_NAME"), resource group: $(ab "$RESOURCE_GROUP"), region: $(ab "$CLUSTER_REGION")"
-# }
-
-# pre_work_on_cluster() {
-#     export POD_OVERRIDES='
-#     {
-#         "apiVersion": "v1",
-#         "kind": "Pod",
-#         "spec": {
-#             "tolerations": [
-#                 {
-#                     "effect": "NoSchedule",
-#                     "key": "kubernetes.azure.com/scalesetpriority",
-#                     "operator": "Equal",
-#                     "value": "spot"
-#                 }
-#             ]
-#         }
-#     }'
-# }
