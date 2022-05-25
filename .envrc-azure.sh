@@ -112,7 +112,7 @@ set_vpn_cidr()
     local cache_dir
     cache_dir="$(cache_dir_of "azure/$subscription/$group")"
     local cache_file="$cache_dir/vnet-gateway_${gateway}_cidr"
-    if [ -f "$cache_file" ]; then
+    if [ -s "$cache_file" ]; then
         log "Getting Network CIDR from cache file: $cache_file"
         VPN_CIDR="$(cat "$cache_file")"
     else
