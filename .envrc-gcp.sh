@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.7/.envrc-clusters.sh" "sha256-hY1DMrf2bGN6bCpuBhDU9FP+iocj5xS7Gix6oNu1VdM="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.9/.envrc-clusters.sh" "sha256-WU93KC0AZD0KAOsN4SW2xOG2FUq0_W3Rh0BKosEoLkk="
 
 work_on_cluster()
 {

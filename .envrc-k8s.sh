@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck source=/_bootstrap.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.8/_bootstrap.sh" "sha256-bz8u71eNUdduFq1qhq8nMytQxF4Mul3P7dOBTGXZCJ0="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.16.9/_bootstrap.sh" "sha256-MLTmJwonwYcB323IXVOidrlEH6d4xwUnikxHqPSJcHM="
 
 req_ver k9s 0.25.18
 req_ver kustomize 4.5.2
