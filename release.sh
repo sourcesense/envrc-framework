@@ -12,7 +12,7 @@ case "$(uname)" in
     Darwin*) sedi=(-i "")
 esac
 
-previous="_bootstrap.sh" \
+previous="_bootstrap.sh"
 
 filesSeries=(\
     ".envrc-k8s.sh" \
