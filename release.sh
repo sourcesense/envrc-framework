@@ -9,19 +9,21 @@ fi
 
 sedi=(-i) # use "${sedi[@]}" instead of -i in sed options
 case "$(uname)" in
-    Darwin*) sedi=(-i "")
+    Darwin*) sedi=(-i "") ;;
 esac
 
 previous="_bootstrap.sh"
 
-filesSeries=(\
-    ".envrc-k8s.sh" \
+filesSeries=(
+    ".envrc-k8s.sh"
     ".envrc-clusters.sh"
+    ".envrc-aws-common.sh"
 )
 
-filesParallel=(\
-    ".envrc-azure.sh" \
-    ".envrc-aws-sso.sh" \
+filesParallel=(
+    ".envrc-azure.sh"
+    ".envrc-aws.sh"
+    ".envrc-aws-sso.sh"
     ".envrc-gcp.sh"
 )
 
