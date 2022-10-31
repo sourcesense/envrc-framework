@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.3/.envrc-clusters.sh" "sha256-GZUpU_xUDhZ4SfG7ft_E80WdSHLZMg8YM3mqQ4AEneg="
+source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.4/.envrc-clusters.sh" "sha256-3pY5A6bs8r2A6abAD8EEZAcaG0A+FaDf3rP0wsoIO+A="
 
 if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
