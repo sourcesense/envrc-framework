@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.7/.envrc-clusters.sh" "sha256-ECnqsLi+1UBDQ4aw20rdC4eW474Kw1uyV9mFMD5tuek="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.8/.envrc-clusters.sh" "sha256-DUiMd1DxtWuya_GaLXCEOYnHThhc4CNjYV8YSle4tSo="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -112,7 +112,8 @@ get_credentials()
     subscriptionId="${SUBSCRIPTION_ID?Must specify kube config in SUBSCRIPTION_ID}"
 
     log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
-    az aks get-credentials --subscription "${subscriptionId}" --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - >"${kubeConfig}" 2>/dev/null
+    # az aks get-credentials --subscription "${subscriptionId}" --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - >"${kubeConfig}" 2>/dev/null
+    az aks get-credentials --subscription "${subscriptionId}" --resource-group "${resourceGroup}" --name "${clusterName}" --file - >"${kubeConfig}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
         log "Successfully got credentials from Azure and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
