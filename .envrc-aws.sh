@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC2148 source=/.envrc-aws-common.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.5/.envrc-aws-common.sh" "sha256-LfLlaJqrLdwfIa88CxDBoBys+WMeKDBYaOhmPvpoDAg="
+if [ -z "${local_SNAPSHOT}" ]; then
+    # shellcheck disable=SC2148 source=/.envrc-aws-common.sh
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.6/.envrc-aws-common.sh" "sha256-FUkIjJ6W7pj16xZ2mbgP3Nh6qrzVOzcFZM5P5U8d_KU="
+else
+    # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-aws-common.sh
+    source "${local_SNAPSHOT}"/.envrc-aws-common.sh
+fi
 
 work_on_cluster()
 {

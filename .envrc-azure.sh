@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
-# shellcheck disable=SC2148 source=/.envrc-clusters.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.5/.envrc-clusters.sh" "sha256-LfLlaJqrLdwfIa88CxDBoBys+WMeKDBYaOhmPvpoDAg="
+if [ -z "${local_SNAPSHOT}" ]; then
+    # shellcheck disable=SC2148 source=/.envrc-clusters.sh
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.6/.envrc-clusters.sh" "sha256-FUkIjJ6W7pj16xZ2mbgP3Nh6qrzVOzcFZM5P5U8d_KU="
+else
+    # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
+    source "${local_SNAPSHOT}"/.envrc-clusters.sh
+fi
 
 if type direnv >/dev/null 2>&1; then
     # shellcheck disable=SC1091
@@ -17,7 +22,7 @@ work_on_cluster()
 {
     enable_scripts
     pre_work_on_cluster
-    log "Working on cluster: $(ab "$CLUSTER_NAME"), resource group: $(ab "$RESOURCE_GROUP"), region: $(ab "$CLUSTER_REGION")"
+    log "Working on cluster: $(ab "$CLUSTER_NAME"), resource group: $(ab "$RESOURCE_GROUP"), resource location: $(ab "$RESOURCE_LOCATION")"
 }
 
 pre_work_on_cluster()
@@ -41,23 +46,20 @@ pre_work_on_cluster()
 
 test_azure_vpn()
 {
-    local net="$1"
-    local vpn="$2"
-
-    ifconfig | grep "$net" 2>/dev/null 1>/dev/null
+    ifconfig | grep "$VPN_CIDR" 2>/dev/null 1>/dev/null
     # shellcheck disable=SC2181
     if [ "$?" = 0 ]; then
-        log "VPN Connection $(a "$(b "$vpn") already established, going on.")"
+        log "VPN Connection $(a "$(b "$vpn_name") already established, going on.")"
     else
-        log "VPN Network not found, establishing VPN connection $(ab "$vpn")"
-        scutil --nc start "$vpn"
+        log "VPN Network not found, establishing VPN connection $(ab "$vpn_name")"
+        scutil --nc start "$vpn_name"
     fi
 
     local connection
     local attempts=0
     local maxAttempts=10
     while [ -z "$connection" ] && ((attempts < maxAttempts)); do
-        connection="$(scutil --nc status "$vpn" | head -1 | grep "^Connected$")"
+        connection="$(scutil --nc status "$vpn_name" | head -1 | grep "^Connected$")"
         attempts=$((attempts + 1))
         if [ -z "$connection" ]; then
             sleep 1
@@ -90,6 +92,12 @@ set_tenant()
     export TENANT_ID="$tenant_id"
 }
 
+set_vpn_gateway_name()
+{
+    local vpn_gateway_name="$1"
+    export VPN_GATEWAY_NAME="$vpn_gateway_name"
+}
+
 set_cluster_name()
 {
     local cluster_name="$1"
@@ -101,9 +109,10 @@ get_credentials()
     clusterName="${CLUSTER_NAME?Must specify cluster name in CLUSTER_NAME}"
     resourceGroup="${RESOURCE_GROUP?Must specify resource group in RESOURCE_GROUP}"
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
+    subscriptionId="${SUBSCRIPTION_ID?Must specify kube config in SUBSCRIPTION_ID}"
 
     log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
-    az aks get-credentials --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - >"${kubeConfig}" 2>/dev/null
+    az aks get-credentials --subscription "${subscriptionId}" --resource-group "${resourceGroup}" --name "${clusterName}" --admin --file - >"${kubeConfig}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
         log "Successfully got credentials from Azure and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
@@ -112,30 +121,36 @@ get_credentials()
     fi
 }
 
-set_network_cidr()
+set_vpn_cidr()
 {
-    local resource_group="$1"
-    log "Getting Network CIDR from $(ab "${resource_group}"), it could take a while, please be patient and ignore direnv warnings..."
+    local subscription="$1"
+    local group="$2"
+    local gateway="$3"
+
     local cache_dir
-    cache_dir="$(cache_dir_of azure/vnet/cidr)"
-    local cache_file="$cache_dir/$resource_group"
-    if [ -f "$cache_file" ]; then
-        NETWORK_CIDR="$(cat "$cache_file")"
+    cache_dir="$(cache_dir_of "azure/$subscription/$group")"
+    local cache_file="$cache_dir/vnet-gateway_${gateway}_cidr"
+    if [ -s "$cache_file" ]; then
+        log "Getting Network CIDR from cache file: $(tildify "$cache_file"))"
+        VPN_CIDR="$(cat "$cache_file")"
     else
-        NETWORK_CIDR=$(az network vnet-gateway show --resource-group "${resource_group}" --name "${resource_group}-gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]' | cut -d\. -f1-3)
-        echo "$NETWORK_CIDR" >"$cache_file"
+        log "Getting Network CIDR from vpn gateway"
+        VPN_CIDR=$(az network vnet-gateway show --subscription "$subscription" --resource-group "$group" --name "$gateway" 2>/dev/null | jq -r '.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes[]' | cut -d\. -f1-3)
+        log "Storing Network CIDR in cache file: $cache_file"
+        echo "$VPN_CIDR" >"$cache_file"
     fi
 
-    if [[ ! ${NETWORK_CIDR} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        whine "Couldn't get Azure Gateway Network CIDR. Aborting, remove cache file $(ab "${cache_file}") to retry."
+    if [[ ! ${VPN_CIDR} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        whine "Couldn't get Azure Gateway Network CIDR. Aborting"
     else
-        log "Successfully got Azure Gateway Network CIDR: $(ab "${NETWORK_CIDR}.0")"
-        export NETWORK_CIDR
+        log "Successfully got Azure Gateway Network CIDR: $(ab "${VPN_CIDR}.0")"
+        export VPN_CIDR
     fi
 }
 
 check_azure_login()
 {
+    echo "${CLUSTER_NAME}"
     log "Checking access to Azure Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
     az group list >/dev/null 2>&1
@@ -151,16 +166,24 @@ check_azure_login()
 
 setup_vpn()
 {
-    local vpn="${RESOURCE_GROUP}-vnet"
-    if [ -z "${NETWORK_CIDR}" ]; then
-        set_network_cidr "${RESOURCE_GROUP}"
+    local subscription="$1"
+    local group="$2"
+    local gateway="$3"
+    local vpn_name="$4"
+
+    if [ -z "${VPN_CIDR}" ]; then
+        set_vpn_cidr "$subscription" "$group" "$gateway"
     fi
-    test_azure_vpn "${NETWORK_CIDR}" "${vpn}"
+
+    test_azure_vpn
 }
 
 setup_kubeconfig()
 {
-    KUBECONFIG=~/.kube/profiles/"${RESOURCE_GROUP}"
+    subscriptionName=$(az account subscription show --subscription-id "$SUBSCRIPTION_ID" 2>/dev/null | jq -r '.displayName')
+    parentDir="$HOME/.kube/profiles/azure"
+    mkdir -p "$parentDir"
+    KUBECONFIG="$parentDir/$subscriptionName-$CLUSTER_NAME"
 
     if [ ! -s "${KUBECONFIG}" ]; then
         get_credentials
@@ -180,12 +203,6 @@ setup_kubeconfig()
 
 setup_cluster_azure()
 {
-    CLUSTER_NAME="${RESOURCE_GROUP}-cluster"
-    check_azure_login
-    setup_vpn
     work_on_cluster
-    set_group "${RESOURCE_GROUP}"
-    set_cluster_name "${CLUSTER_NAME}"
-    set_location "${CLUSTER_REGION}"
     setup_kubeconfig
 }

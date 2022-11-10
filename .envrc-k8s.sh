@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
-# shellcheck source=/_bootstrap.sh
-source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.5/_bootstrap.sh" "sha256-N9YLoWLUaiR2wfgtvsC1v1taoYKfML+8n2_+zfCfiRg="
+if [ -z "${local_SNAPSHOT}" ]; then
+    # shellcheck source=/_bootstrap.sh
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.6/_bootstrap.sh" "sha256-UgHBLm8Hbq8IsXRIlPfa8OrGVme7DVH++iDynf7xB+k="
+else
+    # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/_bootstrap.sh
+    source "${local_SNAPSHOT}"/_bootstrap.sh
+fi
 
-req_ver k9s 0.25.21
-req_ver kustomize 4.5.5
+req_ver k9s 0.26.7
+req_ver kustomize 4.5.7
 req_ver sops 3.7.3
 
 work_on()
