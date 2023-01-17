@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.11/.envrc-clusters.sh" "sha256-4+daFmeAs3BC3vVkUo28XDvIv2W_s9yu1TNTv33Wca8="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.12/.envrc-clusters.sh" "sha256-CSaNZv4WWKsFFe82dMMc3kU3L6O0kxRoL6ph3JlO7UQ="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -193,6 +193,8 @@ setup_kubeconfig()
         namespaceKubeconfig="${KUBECONFIG}-${NAMESPACE}"
         if [ ! -f "${namespaceKubeconfig}" ]; then
             yq e ".contexts[].context.namespace=\"${NAMESPACE}\"" "${KUBECONFIG}" >"${namespaceKubeconfig}"
+            yq -i e ".contexts[].name=\"$CLUSTER_NAME-${NAMESPACE}\"" "${namespaceKubeconfig}"
+            yq -i e ".current-context=\"$CLUSTER_NAME-${NAMESPACE}\"" "${namespaceKubeconfig}"
             chmod go-r "${namespaceKubeconfig}"
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi

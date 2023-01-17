@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-k8s.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.11/.envrc-k8s.sh" "sha256-Dv3qxKmUM2xyTKXhFy8_hz7kLn2hqEtYisHi_w40mbg="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.12/.envrc-k8s.sh" "sha256-ekxjreX7TUguz5lqYmllUBgj6ACJtRQFSLdSm1bwGHI="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-k8s.sh
     source "${local_SNAPSHOT}"/.envrc-k8s.sh

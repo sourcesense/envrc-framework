@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.11/.envrc-clusters.sh" "sha256-4+daFmeAs3BC3vVkUo28XDvIv2W_s9yu1TNTv33Wca8="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.12/.envrc-clusters.sh" "sha256-CSaNZv4WWKsFFe82dMMc3kU3L6O0kxRoL6ph3JlO7UQ="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -58,7 +58,7 @@ get_credentials()
     kubeConfig="${KUBECONFIG?Must specify kube config in KUBECONFIG}"
 
     log "Putting credentials for cluster $(ab "${clusterName}") in kubeconfig file $(ab "${kubeConfig/$HOME/\~}"), it could take a while, please be patient and ignore direnv warnings..."
-    KUBECONFIG=$kubeConfig aws eks update-kubeconfig --region "${clusterRegion}" --name "${clusterName}" 2>/dev/null
+    KUBECONFIG=$kubeConfig aws eks update-kubeconfig --region "${clusterRegion}" --name "${clusterName}" --alias "${clusterName}" 2>/dev/null
 
     if [ -s "${kubeConfig}" ]; then
         log "Successfully got credentials from AWS and created kubeconfig: $(ab "${kubeConfig/$HOME/\~}")"
