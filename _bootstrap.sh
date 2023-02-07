@@ -3,10 +3,10 @@
 export _DEP_VERBOSENESS_LEVEL=0
 
 # shellcheck source=/_dep-bootstrap.sh
-. "$(fetchurl "https://raw.githubusercontent.com/EcoMind/dep-bootstrap/0.5.1/dep-bootstrap.sh" "sha256-lOYbrk89hNgXowWn1q17tpqUeNnEXJLyDTl7mLhbcpU=")" 0.5.1
+. "$(fetchurl "https://raw.githubusercontent.com/EcoMind/dep-bootstrap/0.5.2/dep-bootstrap.sh" "sha256-bvm1j/suhjKpGwGrsnC3iVYbyJngyyvAxIyD3LNiH2s=")" 0.5.2
 
-dep define "log2/shell-common:0.5.11"
-dep define "EcoMind/k8s-common:0.2.25"
+dep define "log2/shell-common:0.5.12"
+dep define "EcoMind/k8s-common:0.2.26"
 
 dep include log2/shell-common strings
 dep include log2/shell-common log
