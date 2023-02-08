@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.13/.envrc-clusters.sh" "sha256-EpocA52zbRab8U5rmqAv+ZecHmHvMmxmSZr+9kOEbr0="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.14/.envrc-clusters.sh" "sha256-3jQ1Gu6PFEjTXgI+ir1AzANDtwLpB9FsJS8GbfdSskE="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -69,7 +69,9 @@ get_credentials()
 
 setup_kubeconfig()
 {
-    KUBECONFIG=~/.kube/profiles/aws-"${AWS_SSO_ID:-$AWS_ACCOUNT_ID}"-"${CLUSTER_NAME}"
+    parentDir="$HOME/.kube/profiles/aws"
+    mkdir -p "$parentDir"
+    KUBECONFIG="$parentDir/${AWS_SSO_ID:-$AWS_ACCOUNT_ID}-${CLUSTER_NAME}"
 
     if [ ! -s "${KUBECONFIG}" ]; then
         get_credentials
