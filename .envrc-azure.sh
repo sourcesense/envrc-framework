@@ -18,6 +18,56 @@ fi
 
 use_cp azure
 
+declare -Ag azExtensionVersions
+azPackVersion=""
+
+req_az_extension_pack() {
+    [ -z "$1" ] && whine "Missing argument: extension_pack_version"
+    azPackVersion="$1"
+}
+
+req_az_extension() {
+    [ -z "$1" ] && whine "Missing argument: extension_name"
+    [ -z "$2" ] && whine "Missing argument: extension_version"
+    local extension_name="$1"
+    local extension_version="$2"
+    azExtensionVersions[$extension_name]="$extension_version"
+}
+
+req_az_extension_pack 0.1
+req_az_extension account 0.2.5
+req_az_extension ssh 1.1.3
+
+req_az_extension_check() {
+    sedi=(-i) # use "${sedi[@]}" instead of -i in sed options
+    case "$(uname)" in
+        Darwin*) sedi=(-i "") ;;
+    esac
+    parentDir="$XDG_CACHE_HOME/azure/cliextensions/$azPackVersion"
+    mkdir -p "$parentDir"
+    extension_versions_file="$parentDir/.extension_versions"
+    export AZURE_EXTENSION_DIR=$parentDir
+
+    if [ ! -f "$extension_versions_file" ]; then
+        for extension_name_req in "${!azExtensionVersions[@]}"; do
+            extension_version_req="${azExtensionVersions[$extension_name_req]}"
+            log "Installing AZ extension ${extension_name_req} with version ${extension_version_req}"
+            echo "$extension_name_req $extension_version_req" >> "$extension_versions_file"
+            az extension add --name "$extension_name_req" --version "$extension_version_req"
+        done
+    else
+        for ext_name in "${!azExtensionVersions[@]}"; do
+            ext_version="${azExtensionVersions[$ext_name]}"
+            sed "${sedi[@]}" -E "s/($ext_name )(.*)/\1$ext_version/" "$extension_versions_file"  
+            full_file_path=$(find "$AZURE_EXTENSION_DIR" -name "$ext_name-$ext_version*.whl")
+                if [ ! -f "$full_file_path" ]; then
+                    log "Installing AZ extension $ext_name with version $ext_version"
+                    az extension add --name "$ext_name" --version "$ext_version"
+                fi
+        done    
+    fi
+}
+
 work_on_cluster()
 {
     enable_scripts
@@ -199,12 +249,15 @@ setup_kubeconfig()
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
+        export KUBECONFIG
+        status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
+        [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
     fi
-    export KUBECONFIG
 }
 
 setup_cluster_azure()
 {
+    req_az_extension_check
     work_on_cluster
     setup_kubeconfig
 }
