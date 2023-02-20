@@ -239,6 +239,7 @@ setup_kubeconfig()
         get_credentials
         chmod go-r "${KUBECONFIG}"
     fi
+
     if [ -n "${NAMESPACE}" ]; then
         namespaceKubeconfig="${KUBECONFIG}-${NAMESPACE}"
         if [ ! -f "${namespaceKubeconfig}" ]; then
@@ -249,10 +250,12 @@ setup_kubeconfig()
             log "Successfully created env specific kubeconfig: $(ab "${namespaceKubeconfig/$HOME/\~}")"
         fi
         KUBECONFIG="${namespaceKubeconfig}"
-        export KUBECONFIG
-        status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
-        [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
     fi
+
+    export KUBECONFIG
+    kubectl version 2>&1 | grep --color=always -e "https://microsoft.com/devicelogin.*"
+    status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
+    [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
 }
 
 setup_cluster_azure()
