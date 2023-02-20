@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck source=/_bootstrap.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.14/_bootstrap.sh" "sha256-TUy90wNjMp+BakHCHpVJncIaHlxUbsVMhZ4IYs_Q8Bk="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.15/_bootstrap.sh" "sha256-ZdyppNy8dBNxeEPyX5RRcMeCCShvuyUdOjowvueE3js="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/_bootstrap.sh
     source "${local_SNAPSHOT}"/_bootstrap.sh
