@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.15/.envrc-clusters.sh" "sha256-QUfJTyRQY1+qh9Y5tl3hIjFUppNu2K2o_1D2K2QiTk8="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.16/.envrc-clusters.sh" "sha256-BtfTqNdJfnCC_+Rc1_7p73tLtwmNC1GIX+pNSk3q7po="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -17,6 +17,8 @@ else
 fi
 
 use_cp azure
+
+req_ver kubelogin 0.0.26
 
 declare -Ag azExtensionVersions
 azPackVersion=""
@@ -252,8 +254,9 @@ setup_kubeconfig()
         KUBECONFIG="${namespaceKubeconfig}"
     fi
 
+    kubelogin convert-kubeconfig -l interactive
     export KUBECONFIG
-    kubectl version 2>&1 | grep --color=always -e "https://microsoft.com/devicelogin.*"
+    # kubectl version 2>&1 | grep --color=always -e "https://microsoft.com/devicelogin.*"
     status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
     [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
 }
