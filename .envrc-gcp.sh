@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.17/.envrc-clusters.sh" "sha256-vODE6Kdj4S2lt_0bwgbCmVVAa_CSzWdkZ7QDf1bxNU0="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.18/.envrc-clusters.sh" "sha256-KNarPfITX3Vm8jF5vfF1WCrjx6bLCnkC9WvuES5BTxo="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -105,7 +105,7 @@ setup_kubeconfig()
     parentDir="$HOME/.kube/profiles/gcp"
     mkdir -p "$parentDir"
     KUBECONFIG="$parentDir/${PROJECT_ID}-${CLUSTER_NAME}"
-    
+
     if [ ! -s "${KUBECONFIG}" ]; then
         get_credentials
         chmod go-r "${KUBECONFIG}"
@@ -119,7 +119,7 @@ setup_kubeconfig()
         fi
         KUBECONFIG="${namespaceKubeconfig}"
         export KUBECONFIG
-        status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
+        status=$(kubectl version -o json 2>/dev/null | jq -r ".serverVersion.gitVersion")
         [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
     fi
 }

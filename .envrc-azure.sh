@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-clusters.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.17/.envrc-clusters.sh" "sha256-vODE6Kdj4S2lt_0bwgbCmVVAa_CSzWdkZ7QDf1bxNU0="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.17.18/.envrc-clusters.sh" "sha256-KNarPfITX3Vm8jF5vfF1WCrjx6bLCnkC9WvuES5BTxo="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-clusters.sh
     source "${local_SNAPSHOT}"/.envrc-clusters.sh
@@ -23,12 +23,14 @@ req_ver kubelogin 0.0.26
 declare -Ag azExtensionVersions
 azPackVersion=""
 
-req_az_extension_pack() {
+req_az_extension_pack()
+{
     [ -z "$1" ] && whine "Missing argument: extension_pack_version"
     azPackVersion="$1"
 }
 
-req_az_extension() {
+req_az_extension()
+{
     [ -z "$1" ] && whine "Missing argument: extension_name"
     [ -z "$2" ] && whine "Missing argument: extension_version"
     local extension_name="$1"
@@ -40,7 +42,8 @@ req_az_extension_pack 0.1
 req_az_extension account 0.2.5
 req_az_extension ssh 1.1.3
 
-req_az_extension_check() {
+req_az_extension_check()
+{
     sedi=(-i) # use "${sedi[@]}" instead of -i in sed options
     case "$(uname)" in
         Darwin*) sedi=(-i "") ;;
@@ -54,19 +57,19 @@ req_az_extension_check() {
         for extension_name_req in "${!azExtensionVersions[@]}"; do
             extension_version_req="${azExtensionVersions[$extension_name_req]}"
             log "Installing AZ extension ${extension_name_req} with version ${extension_version_req}"
-            echo "$extension_name_req $extension_version_req" >> "$extension_versions_file"
+            echo "$extension_name_req $extension_version_req" >>"$extension_versions_file"
             az extension add --name "$extension_name_req" --version "$extension_version_req"
         done
     else
         for ext_name in "${!azExtensionVersions[@]}"; do
             ext_version="${azExtensionVersions[$ext_name]}"
-            sed "${sedi[@]}" -E "s/($ext_name )(.*)/\1$ext_version/" "$extension_versions_file"  
+            sed "${sedi[@]}" -E "s/($ext_name )(.*)/\1$ext_version/" "$extension_versions_file"
             full_file_path=$(find "$AZURE_EXTENSION_DIR" -name "$ext_name-$ext_version*.whl")
-                if [ ! -f "$full_file_path" ]; then
-                    log "Installing AZ extension $ext_name with version $ext_version"
-                    az extension add --name "$ext_name" --version "$ext_version"
-                fi
-        done    
+            if [ ! -f "$full_file_path" ]; then
+                log "Installing AZ extension $ext_name with version $ext_version"
+                az extension add --name "$ext_name" --version "$ext_version"
+            fi
+        done
     fi
 }
 
@@ -257,7 +260,7 @@ setup_kubeconfig()
     kubelogin convert-kubeconfig -l interactive
     export KUBECONFIG
     # kubectl version 2>&1 | grep --color=always -e "https://microsoft.com/devicelogin.*"
-    status=$(kubectl version -o json 2> /dev/null | jq -r ".serverVersion.gitVersion")
+    status=$(kubectl version -o json 2>/dev/null | jq -r ".serverVersion.gitVersion")
     [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
 }
 
