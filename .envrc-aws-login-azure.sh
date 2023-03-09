@@ -79,6 +79,18 @@ get_credentials()
     echo "$kubeconfigTemplate" | envsubst >"$KUBECONFIG"
 }
 
+ensure_logged_in()
+{
+    # In non-interactive mode, we don't see a login prompt, so we need to
+    # explicitly check if we're logged in.
+    log "Checking if logged in to Azure, please follow on-screen prompts if any"
+    if kubelogin get-token --environment AzurePublicCloud --server-id "$AZURE_CLIENT_ID" --client-id "$AZURE_CLIENT_ID" --tenant-id "$AZURE_TENANT_ID" >/dev/null; then
+        log "Currently logged in to Azure, continuing with configuration"
+    else
+        whine "Not logged in to Azure, please login and try again"
+    fi
+}
+
 setup_cluster_aws_login_azure()
 {
     set_azure_client_id "${AZURE_CLIENT_ID?Must specify Azure client id in AZURE_CLIENT_ID}"

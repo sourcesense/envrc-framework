@@ -67,6 +67,13 @@ get_credentials()
     fi
 }
 
+ensure_logged_in()
+{
+    # Nothing to do in interactive mode
+    # Left as an extension point for non-interactive mode
+    :
+}
+
 setup_kubeconfig()
 {
     parentDir="$HOME/.kube/profiles/aws"
@@ -88,6 +95,8 @@ setup_kubeconfig()
     fi
 
     export KUBECONFIG
+    ensure_logged_in
+
     status=$(kubectl version -o json 2>/dev/null | jq -r ".serverVersion.gitVersion")
     [ "$status" = "null" ] && whine "Cannot connect to cluster $(ab "${CLUSTER_NAME}"). Try remove your kubeconfig file $(ab "${KUBECONFIG/$HOME/\~}")"
 }
