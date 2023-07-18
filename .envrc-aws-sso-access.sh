@@ -10,6 +10,12 @@ fi
 
 req_ver aws 2.8.7 awscli
 
+set_aws_account_id()
+{
+    local aws_account_id="$1"
+    export AWS_ACCOUNT_ID="$aws_account_id"
+}
+
 set_aws_sso_id()
 {
     local aws_sso_id="$1"
