@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-aws-common.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.18.3/.envrc-aws-common.sh" "sha256-NelqHlxkEDNmgqYZ7mhuIK+DaqWoaUjoOfu2l4UfaUg="
+    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.18.4/.envrc-aws-common.sh" "sha256-hDRrRy3uZXpG7WqL13f1ptFqjf_pi6kaR2ModSVY_Vc="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-aws-common.sh
     source "${local_SNAPSHOT}"/.envrc-aws-common.sh
