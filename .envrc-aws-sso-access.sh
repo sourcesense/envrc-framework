@@ -31,7 +31,7 @@ set_aws_sso_role_name()
 set_aws_sso_region()
 {
     local resource_region="$1"
-    export AWS_SSO_RESOURCE_REGION="$resource_region"
+    export AWS_SSO_REGION="$resource_region"
 }
 
 check_aws_login_sso()
