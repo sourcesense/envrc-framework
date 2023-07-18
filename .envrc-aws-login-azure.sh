@@ -14,7 +14,7 @@ work_on_cluster()
     log "Working on cluster: $(ab "$CLUSTER_NAME"), AWS Account id: $(ab "$AWS_ACCOUNT_ID"), region: $(ab "$CLUSTER_REGION")"
 }
 
-req_ver kubelogin 0.0.27
+req_ver kubelogin 0.0.30
 
 kubeconfigTemplate="apiVersion: v1
 clusters:
