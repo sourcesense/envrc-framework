@@ -38,7 +38,7 @@ check_aws_login_sso()
 {
     log "Checking access to AWS Cluster $(ab "${CLUSTER_NAME}"), it could take a while, please be patient and ignore direnv warnings..."
 
-    awsConfig="$HOME/.aws/config"
+    local awsConfig="$HOME/.aws/config"
     if grep "\[profile $AWS_PROFILE\]" "$awsConfig" >/dev/null 2>&1; then
         log "Found profile $(ab "${AWS_PROFILE}") in AWS config file $(ab "${awsConfig/$HOME/\~}")"
     else
