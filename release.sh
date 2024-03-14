@@ -12,7 +12,7 @@ case "$(uname)" in
     Darwin*) sedi=(-i "") ;;
 esac
 
-orgName="EcoMind"
+orgName="sourcesense"
 repoName="envrc-framework"
 
 echo "Bumping version to $version on all *.sh and .*.sh files"

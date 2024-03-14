@@ -2,7 +2,7 @@
 
 if [ -z "${local_SNAPSHOT}" ]; then
     # shellcheck disable=SC2148 source=/.envrc-k8s.sh
-    source_url "https://raw.githubusercontent.com/EcoMind/envrc-framework/v0.18.6/.envrc-k8s.sh" "sha256-XzyRfcxeq_fY8OuPOift8XPDXhNCbZ3C241Z_cBryFI="
+    source_url "https://raw.githubusercontent.com/sourcesense/envrc-framework/v0.19.0/.envrc-k8s.sh" "sha256-AweGE9K4n_oGApNWhVFfDUgv4irEywwTQmhaXtXveM8="
 else
     # shellcheck disable=SC1091 source="${local_SNAPSHOT}"/.envrc-k8s.sh
     source "${local_SNAPSHOT}"/.envrc-k8s.sh
@@ -12,7 +12,7 @@ use_cp()
 {
     local cloud_provider="$1"
     log "Setting env for cloud provider: $(ab "$cloud_provider")"
-    dep include EcoMind/k8s-common kube-config-"$cloud_provider"
+    dep include sourcesense/k8s-common kube-config-"$cloud_provider"
 }
 
 enable_scripts()
